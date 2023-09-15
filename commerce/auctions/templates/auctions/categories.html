@@ -1,0 +1,44 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+
+<form method="post" action="{% url 'categories' %}">
+    <div class="form-group">
+    {% csrf_token %}
+    <h2>Enter category:</h2>
+    <input class="form-control mt-2" name="category" type="text">
+    <input class="btn btn-primary mt-3" type="submit">
+    </div>
+</form>
+
+<div class="container float-left">
+{% if noMatches %}
+    <h2>No results found.</h2>
+{% endif %}
+{% if categories %}
+    {% for item in categories %}
+        <a href="{% url 'listing' item.id %}" style="text-decoration:none; color: inherit;">
+        <div class="row border-top border-bottom" >
+            <div class="col-sm"><img class="pull-left" src="{{ item.imageURL }}" height="300"></div>
+            <div class="col-sm">
+            <h1>{{item.title}}</h1>
+            {% for bid in bids %}
+            {% if bid.listing == item %}
+            <h2><b>${{ bid.amount }}</h2>
+            {% endif %}
+            {% endfor %}
+            <br>
+            <h3>{{item.description}}</h3>
+            {% if item.winner != "None" %}
+                <h3 class="text-danger">Sold</h3>
+            {% else %}
+                <h3 class="text-success">Available</h3>
+            {% endif %}
+            </div>
+            <div class="col-sm"></div>
+        </div></a>
+    {% endfor %}
+{% endif %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,93 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+
+{% if listing.winner != "None" and user == bid.user %}
+    <div class="alert alert-success" role="alert">You have won the auction!</div>
+{% endif %}
+
+<div class="container float-left">
+    <div class="row">
+    <div class="col-sm border"><img class="pull-left" src="{{ listing.imageURL }}" height="500"></div>
+
+    <div class="col-sm ml-5">
+        <h1>Listing: {{listing.title}}</h1>
+        <h1><b>${{bid.amount}}</b></h1>
+        <h5>{{listing.description}}</h5>
+
+        <h6>Bid(s): {{ listing.bidCount }}</h6>
+
+        {% if user == bid.user %}
+            <h6>Your bid is the highest bid.</h6>
+        {% endif %}
+
+        <div class="form-group">
+        {% if not listing.user == user %}
+            <!--runs if logged in user is not the listing poster-->
+            <form method="post" action="{% url 'listing' listing.id %}">
+                {% csrf_token %}
+                {% if listing.winner != "None" %}
+                <!--runs if the auction has ended-->
+                    <input disabled class="form-control" type="number" name="bid" min="{{ lowestBid }}" step="0.01", placeholder="Highest Bid: ${{ bid.amount }}">
+                    <h3 class="text-danger">Sold</h3>
+                {% else %}
+                    <input required class="form-control" type="number" name="bid" min="{{ lowestBid }}" step="0.01", placeholder="Current Bid: ${{ bid.amount }}">
+                    <button class="btn btn-primary mt-2" type="submit">Submit Bid</button> 
+                {% endif %}
+            </form>
+            <!--form for toggling watchlist for listing-->
+            <form action="{% url 'toggleWatch' listing.id %}">
+                {% if isWatching %}
+                <button type="submit" class="btn btn-secondary mt-2">Unwatch</button>
+                {% else %}
+                <button type="submit" class="btn btn-secondary mt-2">Watch</button>
+                {% endif %}
+            </form>
+        {% else %}
+            <form method="post" action="{% url 'close' listing.id %}">
+                {% csrf_token %}
+                {% if listing.winner != "None" %}
+                    <!--runs if the auction has ended-->
+                    <input disabled class="form-control" type="number" name="bid" min="{{ lowestBid }}" step="0.01", placeholder="Winning Bid: ${{ bid.amount }}">
+                    <h3 class="text-danger">Sold</h3>
+                {% else %}
+                <button class="btn btn-danger" type="submit">Close Listing</button>
+                {% endif %}
+            </form>
+        {% endif %}
+        <br>
+        <h5>By: {{ listing.user }}</h5>
+
+        {% if listing.category != "" %}
+            <h5>Category: {{ listing.category }}</h5>
+        {% else %}
+            <h5>No category specified.</h5>
+        {% endif %}
+        </div>
+    </div>
+    <div class="col-sm"></div>
+    </div>
+    <br>
+    <h2>Comments:</h2>
+</div>
+<div class="form-group">
+    <form method="post" action="{% url 'comment' listing.id %}">
+        {% csrf_token %}
+        <textarea class="form-control" name="text"></textarea>
+        <button class="btn btn-primary" type="submit">Comment</button> 
+    </form>
+</div>
+{% if comments|length != 0 %}
+{% for comment in comments %}
+    <div class="card text-white bg-secondary mb-3 ms-3" style="max-width: 28rem;">
+        <div class="card-body">
+            <h3 class="card-title">{{comment.user.username}}</h3>
+            <p class="card-text">{{comment.comment}}</p>
+        </div>
+    </div> 
+{% endfor%}
+{% else %}
+<h3>No comments yet.</h3>
+{% endif %}
+
+{% endblock%}

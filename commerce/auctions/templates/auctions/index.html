@@ -1,0 +1,27 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>Active Listings</h2>
+    
+    <div class="container float-left">
+    {% for listing in listings %}
+        {% if listing.winner == "None" %}
+        <a href="{% url 'listing' listing.id %}" style="text-decoration:none; color: inherit;">
+        <div class="row border-top border-bottom" >
+            <div class="col-sm"><img class="pull-left" src="{{ listing.imageURL }}" height="300"></div>
+            <div class="col-sm">
+            <h1>{{listing.title}}</h1>
+            {% for bid in bids %}
+            {% if bid.listing == listing %}
+            <h2><b>${{ bid.amount }}</h2>
+            {% endif %}
+            {% endfor %}
+            <br>
+            <h3>{{listing.description}}</h3>
+            </div>
+            <div class="col-sm"></div>
+        </div></a>
+        {% endif %}
+    {% endfor %}
+    </div>
+{% endblock %}
